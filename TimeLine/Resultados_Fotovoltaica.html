@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Producción Fotovoltaica</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+    <script src="https://rawgit.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
+    <script defer src="Resultados_Fotovoltaica.js"></script>
+</head>
+<body>
+    <h1>Producción Fotovoltaica</h1>
+
+    <label for="start-date">Fecha inicio:</label>
+    <input type="date" id="start-date" min="2024-01-01" max="2024-12-31">
+    <label for="end-date">Fecha fin:</label>
+    <input type="date" id="end-date" min="2024-01-01" max="2024-12-31">
+    <button onclick="updateCharts()">Filtrar</button>
+
+    <canvas id="monthlyChart"></canvas>
+    <canvas id="dailyChart"></canvas>
+
+    <h2>Resumen de Producción</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Mes</th>
+                <th>Producción Mensual (kWh)</th>
+                <th>(%) Autoconsumo</th>
+            </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+    </table>
+
+    <h2>Producción Anual Total: <span id="annualTotal"></span> kWh</h2>
+    <button onclick="downloadPDF()">Descargar PDF</button>
+
+    <script>
+        let data = [];
+
+        // Función para parsear el CSV correctamente
+        function parseCSV(text) {
+            const lines = text.trim().split('\n');
+            const result = [];
+            const headers = lines[0].split(',');
+
+            for (let i = 1; i < lines.length; i++) {
+                const currentline = lines[i].split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/);
+                const obj = {};
+
+                for (let j = 0; j < headers.length; j++) {
+                    let value = currentline[j].replace(/"/g, '').replace('.', '').replace(',', '.');
+                    obj[headers[j].trim()] = isNaN(value) ? value : parseFloat(value);
+                }
+                result.push(obj);
+            }
+            return result;
+        }
+
+        // Cargar el CSV y parsearlo
+        fetch('Produccio Generica.csv')
+            .then(response => response.text())
+            .then(csvData => {
+                data = parseCSV(csvData);
+                updateCharts();
+            })
+            .catch(error => console.error('Error al cargar el CSV:', error));
+
+        // Actualizar gráficas y tabla
+        function updateCharts() {
+            let startDate = document.getElementById('start-date').value;
+            let endDate = document.getElementById('end-date').value;
+
+            if (!startDate || !endDate) {
+                alert('Por favor, selecciona un rango de fechas válido.');
+                return;
+            }
+
+            let start = new Date(startDate);
+            let end = new Date(endDate);
+
+            if (start > end) {
+                alert('La fecha de inicio no puede ser posterior a la fecha de fin.');
+                return;
+            }
+
+            let filteredData = data.filter(entry => {
+                let entryDate = new Date(`2024-${getMonthNumber(entry.Meses)}-01`);
+                return entryDate >= start && entryDate <= end;
+            });
+
+            renderCharts(filteredData);
+            renderTable(filteredData);
+        }
+
+        // Convertir nombre de mes a número
+        function getMonthNumber(monthName) {
+            const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            return months.indexOf(monthName) + 1;
+        }
+
+        // Renderizar gráfica
+        function renderCharts(filteredData) {
+            let ctx = document.getElementById('monthlyChart').getContext('2d');
+            let labels = filteredData.map(entry => entry.Meses);
+            let values = filteredData.map(entry => entry.kWh);
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Producción Mensual (kWh)',
+                        data: values,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Renderizar tabla
+        function renderTable(filteredData) {
+            let tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = '';
+
+            let totalProduccion = 0;
+
+            filteredData.forEach(entry => {
+                let produccion = entry.kWh;
+                let autoconsumo = ((produccion / 3000) * 100).toFixed(2);
+                let row = `<tr>
+                    <td>${entry.Meses}</td>
+                    <td>${produccion.toFixed(2)} kWh</td>
+                    <td>${autoconsumo}%</td>
+                </tr>`;
+                tableBody.innerHTML += row;
+                totalProduccion += produccion;
+            });
+
+            document.getElementById('annualTotal').innerText = totalProduccion.toFixed(2);
+        }
+
+        // Descargar PDF
+        function downloadPDF() {
+            const element = document.body;
+            const opt = {
+                margin: 0.5,
+                filename: 'Produccion_Fotovoltaica.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
+</body>
+</html>
