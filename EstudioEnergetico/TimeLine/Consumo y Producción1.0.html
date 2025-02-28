@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consumo y Producción</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+    <script src="https://rawgit.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
+</head>
+<body>
+    <h1>Producción Fotovoltaica</h1>
+
+    <label for="start-date">Fecha inicio:</label>
+    <input type="date" id="start-date" min="2024-01-01" max="2024-12-31">
+    <label for="end-date">Fecha fin:</label>
+    <input type="date" id="end-date" min="2024-01-01" max="2024-12-31">
+    <button onclick="updateCharts()">Filtrar</button>
+
+    <!-- Gráficas -->
+    <canvas id="monthlyChart"></canvas>
+    <canvas id="dailyChart"></canvas> <!-- Nueva gráfica para los datos del archivo "Consum Generic.csv" -->
+
+    <h2>Resumen de Producción</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Mes</th>
+                <th>Producción Mensual (kWh)</th>
+                <th>(%) Autoconsumo</th>
+            </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+    </table>
+
+    <h2>Producción Anual Total: <span id="annualTotal"></span> kWh</h2>
+    <button onclick="downloadPDF()">Descargar PDF</button>
+
+    <script>
+        let productionData = [];
+        let consumptionData = [];
+
+        // Función para parsear CSV con soporte para comas en valores
+        function parseCSV(text) {
+            const lines = text.trim().split('\n');
+            const result = [];
+            const headers = lines[0].split(',');
+
+            for (let i = 1; i < lines.length; i++) {
+                const currentline = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
+                const obj = {};
+
+                headers.forEach((header, j) => {
+                    if (currentline[j]) {
+                        let value = currentline[j].replace(/^"|"$/g, '').trim();
+                        value = value.replace(/\./g, '').replace(/,/g, '.');
+                        obj[header.trim()] = isNaN(value) ? value : parseFloat(value);
+                    }
+                });
+
+                if (Object.keys(obj).length) result.push(obj);
+            }
+            return result;
+        }
+
+        // Cargar CSVs y parsearlos
+        Promise.all([
+            fetch('Produccio Generica.csv').then(response => response.text()),
+            fetch('Consum Generic.csv').then(response => response.text())
+        ])
+        .then(([productionCsvData, consumptionCsvData]) => {
+            productionData = parseCSV(productionCsvData);
+            consumptionData = parseCSV(consumptionCsvData);
+
+            console.log("Producción Cargada:", productionData);
+            console.log("Consumo Cargado:", consumptionData);
+
+            updateCharts();
+        })
+        .catch(error => console.error('Error al cargar los CSVs:', error));
+
+        function updateCharts() {
+            let startDate = document.getElementById('start-date').value;
+            let endDate = document.getElementById('end-date').value;
+
+            if (!startDate || !endDate) {
+                alert('Por favor, selecciona un rango de fechas válido.');
+                return;
+            }
+
+            let start = new Date(startDate);
+            let end = new Date(endDate);
+
+            if (start > end) {
+                alert('La fecha de inicio no puede ser posterior a la fecha de fin.');
+                return;
+            }
+
+            let filteredProductionData = productionData.filter(entry => {
+                let entryDate = new Date(`2024-${getMonthNumber(entry.Meses)}-01`);
+                return entryDate >= start && entryDate <= end;
+            });
+
+            let filteredConsumptionData = consumptionData.filter(entry => {
+                let entryDate = new Date(`2024-${getMonthNumber(entry.Meses)}-01`);
+                return entryDate >= start && entryDate <= end;
+            });
+
+            renderCharts(filteredProductionData, filteredConsumptionData);
+            renderTable(filteredProductionData);
+        }
+
+        function getMonthNumber(monthName) {
+            const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            return months.indexOf(monthName) + 1;
+        }
+
+        function renderCharts(filteredProductionData, filteredConsumptionData) {
+            let ctxProduction = document.getElementById('monthlyChart').getContext('2d');
+            let ctxConsumption = document.getElementById('dailyChart').getContext('2d');
+
+            let labelsProduction = filteredProductionData.map(entry => entry.Meses);
+            let valuesProduction = filteredProductionData.map(entry => entry.kWh);
+
+            let labelsConsumption = filteredConsumptionData.map(entry => entry.Meses);
+            let valuesConsumption = filteredConsumptionData.map(entry => entry.kWh);
+
+            if (window.productionChart) window.productionChart.destroy();
+            if (window.consumptionChart) window.consumptionChart.destroy();
+
+            window.productionChart = new Chart(ctxProduction, {
+                type: 'bar',
+                data: {
+                    labels: labelsProduction,
+                    datasets: [{
+                        label: 'Producción Mensual (kWh)',
+                        data: valuesProduction,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: { responsive: true, scales: { y: { beginAtZero: true } } }
+            });
+
+            window.consumptionChart = new Chart(ctxConsumption, {
+                type: 'bar',
+                data: {
+                    labels: labelsConsumption,
+                    datasets: [{
+                        label: 'Consumo Mensual (kWh)',
+                        data: valuesConsumption,
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: { responsive: true, scales: { y: { beginAtZero: true } } }
+            });
+        }
+
+        function renderTable(filteredData) {
+            let tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = '';
+            let totalProduccion = 0;
+
+            filteredData.forEach(entry => {
+                let row = `<tr>
+                    <td>${entry.Meses}</td>
+                    <td>${entry.kWh.toFixed(2)} kWh</td>
+                    <td>${((entry.kWh / 3000) * 100).toFixed(2)}%</td>
+                </tr>`;
+                tableBody.innerHTML += row;
+                totalProduccion += entry.kWh;
+            });
+
+            document.getElementById('annualTotal').innerText = totalProduccion.toFixed(2);
+        }
+
+        function downloadPDF() {
+            html2pdf().from(document.body).save('Consumo_y_Producción.pdf');
+        }
+    </script>
+</body>
+</html>

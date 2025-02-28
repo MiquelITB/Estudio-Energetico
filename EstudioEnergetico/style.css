@@ -1,0 +1,177 @@
+@font-face {
+    font-family: 'Segoe UI';
+    src: url('segoe_ui/segoeuithibd.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Segoe UI';
+    src: url('segoe_ui/segoeuithis.ttf') format('truetype');
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Segoe UI';
+    src: url('segoe_ui/segoeuithisi.ttf') format('truetype');
+    font-weight: bold;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Segoe UI';
+    src: url('segoe_ui/segoeuithisz.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 20px;
+    padding: 0;
+    background-image: url('Imagenes/fondo.jpg'); /* Ruta ajustada */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    text-align: center;
+}
+
+h1, h2 {
+    color: #ffeb3b;
+    font-weight: bold; /* Hacer la letra más gruesa */
+    font-size: 2.5em; /* Hacer la letra más grande (ajusta el valor según sea necesario) */
+}
+
+label {
+    font-weight: bold;
+    margin-right: 10px;
+    color: #4caf50;
+    background-color: rgba(224, 255, 255, 1); /* Azul claro con 70% de opacidad */
+    padding: 5px 10px; /* Añadir relleno para separar el texto del fondo */
+    border-radius: 10px; /* Añadir bordes redondeados */
+}
+
+input[type="date"] {
+    padding: 5px;
+    margin: 10px 5px;
+    border: 1px solid #ccc;
+    border-radius: 8px; /* Bordes redondeados */
+}
+
+.controles-fila {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.controles-fila .control {
+    margin-right: 10px;
+    margin-bottom: 0;
+}
+
+button {
+    padding: 10px 15px;
+    border: none;
+    background: linear-gradient(to bottom, #4caf50, #388e3c);
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 20px; /* Bordes más redondeados */
+    margin-top: 10px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+button:hover {
+    background: linear-gradient(to bottom, #388e3c, #4caf50);
+}
+
+select {
+    padding: 8px 12px;
+    border: 1px solid #87CEEB; /* Azul cielo claro para el borde */
+    border-radius: 15px; /* Bordes redondeados */
+    background-color: rgba(224, 255, 255, 0.7); /* Cian claro con 70% de opacidad */
+    color: #388e3c; /* Color del texto */
+    font-size: 16px;
+    cursor: pointer;
+    margin: 5px; /* Añadir margen para separarlos un poco */
+}
+
+select:focus {
+    outline: none; /* Eliminar el borde de enfoque predeterminado */
+    border-color: #40E0D0; /* Azul turquesa al enfocar */
+    box-shadow: 0 0 5px rgba(64, 224, 208, 0.5); /* Sombra suave al enfocar */
+}
+
+select option {
+    background-color: white; /* Fondo blanco para las opciones */
+    color: #388e3c;
+}
+
+canvas {
+    width: 600px;
+    height: 300px;
+    max-width: 80%;
+    margin: 10px auto 5px auto;
+    display: block;
+    background-color: rgba(255, 255, 255, 0.7); /* Fondo blanco con 70% de opacidad */
+    padding: 10px;
+    border-radius: 15px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+table {
+    width: 80%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    background-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background-color: rgba(64, 224, 208, 0.7);
+    color: #333;
+}
+
+td {
+    background-color: rgba(173, 216, 230, 0.5);
+    color: #333;
+}
+
+#annualTotal {
+    font-weight: bold;
+    font-size: 20px;
+    color: #2196f3;
+}
+
+#pdf-content {
+background-color: rgba(255, 255, 255, 0);
+}
+
+#pdf-content h1, #pdf-content h2 {
+    margin: 10px 0; /* Reducir márgenes del título */
+}
+
+#pdf-content .graficas {
+    margin-bottom: 10px; /* Reducir margen inferior de las gráficas */
+}
+
+#pdf-content canvas {
+    margin: 5px auto; /* Reducir márgenes de las gráficas */
+}
+
+#pdf-content table {
+    margin: 10px auto; /* Reducir márgenes de la tabla */
+}
+
+#pdf-content table, #pdf-content th, #pdf-content td {
+    padding: 5px; /* Reducir relleno de las celdas */
+}

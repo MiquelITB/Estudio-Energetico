@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Estudio Energético</title>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="pdf-content">
+    <h1>Estudio Energético</h1>
+    <div class="controles-fila">
+        <div class="control">
+            <label for="mesInicio">Mes de Inicio:</label>
+            <select id="mesInicio">
+                <option value="0">Enero</option>
+                <option value="1">Febrero</option>
+                <option value="2">Marzo</option>
+                <option value="3">Abril</option>
+                <option value="4">Mayo</option>
+                <option value="5">Junio</option>
+                <option value="6">Julio</option>
+                <option value="7">Agosto</option>
+                <option value="8">Septiembre</option>
+                <option value="9">Octubre</option>
+                <option value="10">Noviembre</option>
+                <option value="11">Diciembre</option>
+            </select>
+        </div>
+
+        <div class="control">
+            <label for="mesFin">Mes de Fin:</label>
+            <select id="mesFin">
+                <option value="0">Enero</option>
+                <option value="1">Febrero</option>
+                <option value="2">Marzo</option>
+                <option value="3">Abril</option>
+                <option value="4">Mayo</option>
+                <option value="5">Junio</option>
+                <option value="6">Julio</option>
+                <option value="7">Agosto</option>
+                <option value="8">Septiembre</option>
+                <option value="9">Octubre</option>
+                <option value="10">Noviembre</option>
+                <option value="11">Diciembre</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="ajuste-fila">
+        <div class="control">
+            <label for="ajusteProduccion">Ajuste de Producción Fotovoltaica:</label>
+            <button id="botonAjuste" data-accion="+">+</button>
+            <select id="ajusteProduccion">
+                <option value="0">0%</option>
+                <option value="10">10%</option>
+                <option value="20">20%</option>
+                <option value="30">30%</option>
+                <option value="40">40%</option>
+                <option value="50">50%</option>
+                <option value="60">60%</option>
+                <option value="70">70%</option>
+                <option value="80">80%</option>
+                <option value="90">90%</option>
+                <option value="100">100%</option>
+                <option value="150">150%</option>
+                <option value="200">200%</option>
+                <option value="250">250%</option>
+                <option value="300">300%</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="ajuste-fila">
+            <label for="ajusteConsumo">Ajuste de Consumo Elèctrico:</label>
+            <button id="botonAjusteConsumo" data-accion="+">+</button>
+            <select id="ajusteConsumo">
+                <option value="0">0%</option>
+                <option value="10">10%</option>
+                <option value="20">20%</option>
+                <option value="30">30%</option>
+                <option value="40">40%</option>
+                <option value="50">50%</option>
+                <option value="60">60%</option>
+                <option value="70">70%</option>
+                <option value="80">80%</option>
+                <option value="90">90%</option>
+                <option value="100">100%</option>
+                <option value="150">150%</option>
+                <option value="200">200%</option>
+                <option value="250">250%</option>
+                <option value="300">300%</option>
+            </select>
+        </div>
+
+        <div class="ajuste-fila">
+            <label for="ajusteConsumoAgua">Ajuste de Consumo de Agua:</label>
+            <button id="botonAjusteConsumoAgua" data-accion="+">+</button>
+            <select id="ajusteConsumoAgua">
+                <option value="0">0%</option>
+                <option value="10">10%</option>
+                <option value="20">20%</option>
+                <option value="30">30%</option>
+                <option value="40">40%</option>
+                <option value="50">50%</option>
+                <option value="60">60%</option>
+                <option value="70">70%</option>
+                <option value="80">80%</option>
+                <option value="90">90%</option>
+                <option value="100">100%</option>
+                <option value="150">150%</option>
+                <option value="200">200%</option>
+                <option value="250">250%</option>
+                <option value="300">300%</option>
+            </select>
+        </div>
+
+    <div class="boton-generar">
+        <button onclick="actualizarEstudio()">Generar</button>
+    </div>
+
+    <div class="graficas">
+        <div class="grafica">
+            <canvas id="graficaFotovoltaica"></canvas>
+        </div>
+
+        <div class="grafica">
+            <canvas id="graficaElectrico"></canvas>
+        </div>
+
+        <div class="grafica">
+            <canvas id="graficaAgua"></canvas>
+        </div>
+
+        <div class="grafica">
+            <canvas id="graficaGastos"></canvas>
+        </div>
+    </div>
+
+    <h2>Datos Seleccionados</h2>
+    <table id="tablaDatos">
+        <thead>
+            <tr>
+                <th>Mes</th>
+                <th>Producción Fotovoltaica (kWh)</th>
+                <th>Consumo Eléctrico (kWh)</th>
+                <th>Consumo de Agua (l)</th>
+                <th>Gastos (€)</th>
+                <th>Autoconsumo (%)</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+    <button onclick="imprimirPDF()">Imprimir Estudio</button>
+
+    <script src="script.js"></script>
+</body>
+</html>
